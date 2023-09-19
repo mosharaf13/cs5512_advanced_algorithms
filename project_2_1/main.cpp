@@ -22,7 +22,7 @@ public:
     }
 
     std::string getFormattedName() const {
-        return lastName + middleName.substr(0, 1) + firstName;
+        return lastName + " " + middleName.substr(0, 1) + " " + firstName;
     }
 
 private:
@@ -67,7 +67,7 @@ public:
     PhoneNumber(const AreaCode& areaCode, const std::string& number) : areaCode(areaCode), number(number) {}
 
     std::string getFormattedNumber() const {
-        return areaCode.getCode() + number;
+        return areaCode.getCode() + "-" + number;
     }
 
 private:
