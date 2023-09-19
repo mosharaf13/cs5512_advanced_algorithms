@@ -42,7 +42,7 @@ public:
     void print() const {
         Node* current = head;
         while (current) {
-            std::cout << "Key: " << current->data.first << ", Value: " << current->data.second << std::endl;
+//            std::cout << "Key: " << current->data.first << ", Value: " << current->data.second << std::endl;
             current = current->next;
         }
 
@@ -56,6 +56,31 @@ public:
 
     Node* end() const {
         return nullptr;
+    }
+
+    void removeAll(const K& key) { // deletes all values associated with a key
+        Node* current = head;
+        Node* previous = nullptr;
+
+        while (current) {
+            if (current->data.first == key) {
+                // Remove the node with the matching key
+                if (previous) {
+                    previous->next = current->next;
+                    delete current;
+                    current = previous->next;
+                } else {
+                    // If the node to be removed is the head
+                    head = current->next;
+                    delete current;
+                    current = head;
+                }
+            } else {
+                // Move to the next node
+                previous = current;
+                current = current->next;
+            }
+        }
     }
 
 
@@ -114,13 +139,23 @@ public:
         }
     }
 
-    //    void getDisplayString() {
-    //        for (auto bucket : hashtable) {
-    //            for (auto pair = bucket.begin(); pair != bucket.end(); ++pair) {
-    //                std::cout << "Key: " << pair->data.first << ", Value: " << pair->data.second << std::endl;
-    //            }
-    //        }
-    //    }
+    void getDisplayString() {
+
+        for (auto bucket : hashtable) {
+            for (auto pair = bucket.begin(); pair != bucket.end(); ++pair) {
+                std::cout << "Key: " << pair->data.first << ", Value: " << pair->data.second << std::endl;
+            }
+        }
+    }
+
+    void removeAll(const K& key){
+        keyTokens.clear();
+        tokenize(key);
+
+        size_t index = hash(keyTokens[0]); //select hash based on firstname
+        auto& bucket = hashtable[index];
+        bucket.removeAll(key);
+    }
 
 //    void getDisplayString() const {
 //
@@ -149,11 +184,6 @@ public:
         return values;
     }
 
-    vector<V> contains(const K& key) const {
-        V value;
-        return fetch(key);
-    }
-
     [[deprecated]] void remove(const K& key) {
         //todo implement remove
     }
@@ -177,9 +207,20 @@ int main() {
 
 
 
-//    for(auto value: dict.fetch("two")){
-//        cout << "Value for 'two' is: " << value << endl;
-//    }
+    for(auto value: dict.fetch("two")){
+        cout << "Value for 'two' is: " << value << endl;
+    }
+
+    dict.removeAll("two");
+    cout<<"deleted"<<endl;
+
+    for(auto value: dict.fetch("two")){
+        cout << "Value for 'two' is: " << value << endl;
+    }
+
+    cout<<endl<<endl;
+
+    dict.getDisplayString();
 //    vector<string> bucket = dict.fetch("two");
 //
 //    for (auto pair = bucket.begin(); pair != bucket.end(); pair = pair->next) {
