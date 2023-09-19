@@ -6,6 +6,103 @@
 
 using namespace std;
 
+class Name {
+public:
+    Name(const std::string& first, const std::string& middle, const std::string& last) {
+        setFirstName(first);
+        setMiddleName(middle);
+        setLastName(last);
+    }
+
+    void setFirstName(const std::string& first) {
+        firstName = canonicalize(first);
+    }
+
+    void setMiddleName(const std::string& middle) {
+        middleName = canonicalize(middle);
+    }
+
+    void setLastName(const std::string& last) {
+        lastName = canonicalize(last);
+    }
+
+    std::string getFormattedName() const {
+        return lastName + " " + middleName.substr(0, 1) + " " + firstName;
+    }
+
+private:
+    std::string firstName;
+    std::string middleName;
+    std::string lastName;
+
+    std::string canonicalize(const std::string& name) {
+        std::string result = name;
+        // Remove leading and trailing spaces
+        while (!result.empty() && std::isspace(result.front())) {
+            result.erase(result.begin());
+        }
+        while (!result.empty() && std::isspace(result.back())) {
+            result.pop_back();
+        }
+        // Uppercase first character, lowercase the rest
+        if (!result.empty()) {
+            result[0] = std::toupper(result[0]);
+            for (size_t i = 1; i < result.length(); ++i) {
+                result[i] = std::tolower(result[i]);
+            }
+        }
+        return result;
+    }
+};
+
+class AreaCode {
+public:
+    AreaCode(const std::string& code) : code(code) {}
+
+    std::string getCode() const {
+        return code;
+    }
+
+private:
+    std::string code;
+};
+
+class PhoneNumber {
+public:
+    PhoneNumber(const AreaCode& areaCode, const std::string& number) : areaCode(areaCode), number(number) {}
+
+    std::string getFormattedNumber() const {
+        return areaCode.getCode() + "-" + number;
+    }
+
+private:
+    AreaCode areaCode;
+    std::string number;
+};
+
+class PhoneEntry {
+public:
+    PhoneEntry(const Name& name, const std::string& address, const PhoneNumber& phoneNumber)
+            : name(name), address(address), phoneNumber(phoneNumber) {}
+
+    std::string getFormattedName() const {
+        return name.getFormattedName();
+    }
+
+    std::string getPhoneNumber() const {
+        return phoneNumber.getFormattedNumber();
+    }
+
+    std::string getDisplayString() const {
+        return "Name: " + name.getFormattedName() + ", Address: " + address + ", Phone: " + phoneNumber.getFormattedNumber();
+    }
+
+private:
+    Name name;
+    std::string address;
+    PhoneNumber phoneNumber;
+};
+
 
 template <typename K, typename V>
 class LinkedList {
@@ -28,21 +125,10 @@ public:
         head = newNode;
     }
 
-    bool contains(const K& key) const {
-        Node* current = head;
-        while (current) {
-            if (current->data.first == key) {
-                return true;
-            }
-            current = current->next;
-        }
-        return false;
-    }
-
     void print() const {
         Node* current = head;
         while (current) {
-//            std::cout << "Key: " << current->data.first << ", Value: " << current->data.second << std::endl;
+            std::cout << "Key: " << current->data.first << std::endl;
             current = current->next;
         }
 
@@ -98,13 +184,16 @@ private:
         for (char c : fullName) {
             sum += static_cast<int>(c);
         }
-//        cout<<fullName<<"  "<<sum<<"  "<<sum%N<<endl;
         return sum % N;
     }
 
 public:
     Dictionary() {
         hashtable.resize(N);
+
+        for (size_t i = 0; i < N; ++i) {
+            hashtable[i] = LinkedList<K, V>();
+        }
     }
 
     void tokenize(const K& fullName) {
@@ -117,33 +206,18 @@ public:
     }
 
     void insert(const K& key, const V& value) {
-
-        keyTokens.clear();
-        tokenize(key);
-
-        size_t index = hash(keyTokens[0]); //select hash based on firstname
-//        cout<< index<<endl;
+        size_t index = hash(key); //select hash based on lastname
+        cout<< index<<endl;
         auto& bucket = hashtable[index];
         bucket.insert(key, value);
-
         bucket.print();
-
-        if (keyTokens.size() > 2) {
-            index = hash(keyTokens[2]); //select hash based on lastname
-            bucket = hashtable[index];
-            bucket.insert(key, value);
-
-            index = hash(keyTokens[2] + keyTokens[0]); //select hash based on lastname + firstname
-            bucket = hashtable[index];
-            bucket.insert(key, value);
-        }
     }
 
     void getDisplayString() {
 
         for (auto bucket : hashtable) {
             for (auto pair = bucket.begin(); pair != bucket.end(); ++pair) {
-                std::cout << "Key: " << pair->data.first << ", Value: " << pair->data.second << std::endl;
+                std::cout << "Key: " << pair->data.first << ", Value: " << pair->data.second.getDisplayString() << std::endl;
             }
         }
     }
@@ -152,98 +226,62 @@ public:
         keyTokens.clear();
         tokenize(key);
 
-        size_t index = hash(keyTokens[0]); //select hash based on firstname
+        size_t index = hash(keyTokens[0]); //select hash based on lastname
         auto& bucket = hashtable[index];
         bucket.removeAll(key);
     }
 
-//    void getDisplayString() const {
-//
-//        for (const auto& bucket : hashtable) {
-//            for (const auto& pair : bucket) {
-//                std::cout << "Key: " << pair.data.first << ", Value: " << pair.data.second << std::endl;
-//            }
-//        }
-//    }
-
-
-    vector<V> fetch(const K& key) const {
+    vector<V> fetch(const K& key)  {
         vector<V> values;
+
         size_t index = hash(key);
-        const auto& bucket = hashtable[index];
+        cout<< index<<endl;
+        auto& bucket = hashtable[index];
 
         for (auto pair = bucket.begin(); pair != bucket.end(); pair = pair->next) {
+            cout<<pair->data.first<<endl;
             if (pair->data.first == key) {
-//                value = pair->data.second;
-//                return true;
-                cout<<"matched"<<endl;
+                cout<<"matched "<<pair->data.first <<endl;
                 values.push_back(pair->data.second);
             }
         }
 
         return values;
     }
-
-    [[deprecated]] void remove(const K& key) {
-        //todo implement remove
-    }
 };
 
 int main() {
-    Dictionary<string, string> dict;
-    dict.insert("one", "one");
 
+    Dictionary<string, PhoneEntry> dict;
 
-    dict.insert("two", "two");
-    dict.insert("two", "three");
+    // Create instances of PhoneEntry and add them to the dictionary.
+    AreaCode areaCode1("123");
+    PhoneNumber phoneNumber1(areaCode1, "456-7890");
+    Name name1("firstname", "middlename", "lastname");
+    PhoneEntry entry1(name1, "123 Main St", phoneNumber1);
+    dict.insert(entry1.getFormattedName(), entry1);
 
-    dict.insert("four", "three");
+    AreaCode areaCode2("456");
+    PhoneNumber phoneNumber2(areaCode2, "789-1234");
+    Name name2("Alice", "Johnson", "Brown");
+    PhoneEntry entry2(name2, "456 Elm St", phoneNumber2);
+    dict.insert(entry2.getFormattedName(), entry2);
 
-    dict.insert("five", "three");
-    dict.insert("six", "three");
-    dict.insert("ajfljhatoiuqewrhopwerhj", "three");
-//    dict.insert("two", 4);
-//    dict.insert("three", 3);
-
-
-
-    for(auto value: dict.fetch("two")){
-        cout << "Value for 'two' is: " << value << endl;
+    // Fetch and display PhoneEntry instances by key.
+    for (auto phoneEntry : dict.fetch(entry2.getFormattedName())) {
+        cout << "Phone entry for 'John Doe Smith' is: " << phoneEntry.getDisplayString() << endl;
     }
 
-    dict.removeAll("two");
-    cout<<"deleted"<<endl;
+    // Remove a PhoneEntry by key.
+//    dict.removeAll(entry1.getFormattedName());
 
-    for(auto value: dict.fetch("two")){
-        cout << "Value for 'two' is: " << value << endl;
-    }
-
-    cout<<endl<<endl;
-
-    dict.getDisplayString();
-//    vector<string> bucket = dict.fetch("two");
-//
-//    for (auto pair = bucket.begin(); pair != bucket.end(); pair = pair->next) {
-//
+    // Fetch the removed PhoneEntry (should be empty).
+//    for (auto value : dict.fetch(entry1.getFormattedName())) {
+//        cout << "Value for 'John Doe Smith' is: " << value.getDisplayString() << endl;
 //    }
 
-//    for(auto& value: dict.fetch("one")){
-//        cout << "Value for 'one' is: " << value << endl;
-//    }
-
-
-//    if (dict.contains("four")) {
-//        cout << "'four' is in the dictionary." << endl;
-//    } else {
-//        cout << "'four' is not in the dictionary." << endl;
-//    }
-
+    // Display the contents of the dictionary.
 //    dict.getDisplayString();
-//    dict.remove("two");
-
-//    if (!dict.contains("two")) {
-//        cout << "'two' has been removed from the dictionary." << endl;
-//    }
 
     return 0;
 }
