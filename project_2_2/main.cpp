@@ -144,7 +144,7 @@ public:
         return nullptr;
     }
 
-    void removeAll(const K& key) { // deletes all values associated with a key
+    void deleteAll(const K& key) { // deletes all values associated with a key
         Node* current = head;
         Node* previous = nullptr;
 
@@ -169,7 +169,6 @@ public:
         }
     }
 
-
 };
 
 
@@ -179,11 +178,12 @@ private:
     vector<LinkedList<K, V>> hashtable;
     vector<string> keyTokens;
 
-    size_t hash(const std::string& fullName) const {
+    size_t hash(const std::string& key) const {
         int sum = 0;
-        for (char c : fullName) {
+        for (char c : key) {
             sum += static_cast<int>(c);
         }
+//        cout<<key<<"  "<<sum<<"  "<<sum%N<<endl;
         return sum % N;
     }
 
@@ -206,11 +206,31 @@ public:
     }
 
     void insert(const K& key, const V& value) {
-        size_t index = hash(key); //select hash based on lastname
-        cout<< index<<endl;
+
+        keyTokens.clear();
+        tokenize(key);
+//        for(auto key: keyTokens){
+//            cout<<key<<endl;
+//        }
+        size_t index = hash(keyTokens[0]); //select hash based on lastname
+        cout<<index<<endl;
         auto& bucket = hashtable[index];
-        bucket.insert(key, value);
+        bucket.insert(keyTokens[0], value);
         bucket.print();
+
+        if (keyTokens.size() > 2) {
+            index = hash(keyTokens[2]); //select hash based on firstname
+            cout<<index<<endl;
+            auto& bucket2 = hashtable[index];
+            bucket2.insert(keyTokens[2], value);
+//            bucket.print();
+
+            index = hash(keyTokens[0] +", "+ keyTokens[2]); //select hash based on "lastname, firstname"
+            cout<<index<<endl;
+            auto& bucket3 = hashtable[index];
+            bucket3.insert(keyTokens[0] +", "+ keyTokens[2], value);
+//            bucket.print();
+        }
     }
 
     void getDisplayString() {
@@ -222,27 +242,64 @@ public:
         }
     }
 
-    void removeAll(const K& key){
+    void deleteAll(const K& key) {
         keyTokens.clear();
         tokenize(key);
 
-        size_t index = hash(keyTokens[0]); //select hash based on lastname
-        auto& bucket = hashtable[index];
-        bucket.removeAll(key);
+        if (!keyTokens.empty()) {
+            size_t index = hash(keyTokens[0]); // select hash based on lastname
+            auto& bucket = hashtable[index];
+            bucket.deleteAll(keyTokens[0]);
+        }
+
+        if (keyTokens.size() > 2) {
+            size_t index = hash(keyTokens[2]); // select hash based on firstname
+            auto& bucket2 = hashtable[index];
+            bucket2.deleteAll(keyTokens[2]);
+
+            size_t index3 = hash(keyTokens[0] + ", " + keyTokens[2]); // select hash based on "lastname, firstname"
+            auto& bucket3 = hashtable[index3];
+            bucket3.deleteAll(keyTokens[0] + ", " + keyTokens[2]);
+        }
     }
 
     vector<V> fetch(const K& key)  {
         vector<V> values;
 
-        size_t index = hash(key);
-        cout<< index<<endl;
+        keyTokens.clear();
+        tokenize(key);
+
+        size_t index = hash(keyTokens[0]); //select hash based on lastname
+        cout<<index<<endl;
         auto& bucket = hashtable[index];
 
         for (auto pair = bucket.begin(); pair != bucket.end(); pair = pair->next) {
             cout<<pair->data.first<<endl;
-            if (pair->data.first == key) {
-                cout<<"matched "<<pair->data.first <<endl;
+            if (pair->data.first == keyTokens[0]) {
+//                cout<<"matched "<<pair->data.first << " " << keyTokens[0]<<endl;
                 values.push_back(pair->data.second);
+            }
+        }
+
+        if (keyTokens.size() > 2) {
+            index = hash(keyTokens[2]); //select hash based on lastname
+            cout<<index<<endl;
+            auto& bucket2 = hashtable[index];
+            for (auto pair = bucket2.begin(); pair != bucket2.end(); pair = pair->next) {
+                if (pair->data.first == keyTokens[2]) {
+//                    cout<<"matched "<<pair->data.first << " " << keyTokens[0]<<endl;
+                    values.push_back(pair->data.second);
+                }
+            }
+
+            index = hash(keyTokens[0] +", "+ keyTokens[2]); //select hash based on "lastname, firstname"
+            cout<<index<<endl;
+            auto& bucket3 = hashtable[index];
+            for (auto pair = bucket3.begin(); pair != bucket3.end(); pair = pair->next) {
+                if (pair->data.first == keyTokens[0] +", "+ keyTokens[2]) {
+//                    cout<<"matched "<<pair->data.first << " " << keyTokens[0]<<endl;
+                    values.push_back(pair->data.second);
+                }
             }
         }
 
@@ -259,22 +316,34 @@ int main() {
     PhoneNumber phoneNumber1(areaCode1, "456-7890");
     Name name1("firstname", "middlename", "lastname");
     PhoneEntry entry1(name1, "123 Main St", phoneNumber1);
+
     dict.insert(entry1.getFormattedName(), entry1);
 
     AreaCode areaCode2("456");
     PhoneNumber phoneNumber2(areaCode2, "789-1234");
-    Name name2("Alice", "Johnson", "Brown");
+    Name name2("Alice", "Johnson", "lastname");
     PhoneEntry entry2(name2, "456 Elm St", phoneNumber2);
     dict.insert(entry2.getFormattedName(), entry2);
 
-    // Fetch and display PhoneEntry instances by key.
-    for (auto phoneEntry : dict.fetch(entry2.getFormattedName())) {
-        cout << "Phone entry for 'John Doe Smith' is: " << phoneEntry.getDisplayString() << endl;
+    // Fetch and display PhoneEntry instances by matching lastname or firstname or lastname, firstname
+    for (auto phoneEntry : dict.fetch(entry1.getFormattedName())) {
+        cout << "Phone entry for \'"<< entry1.getFormattedName() <<"\' is: " << phoneEntry.getDisplayString() << endl;
     }
 
-    // Remove a PhoneEntry by key.
-//    dict.removeAll(entry1.getFormattedName());
+    // Remove all phoneentries for a name
+    dict.deleteAll(entry1.getFormattedName());
+    cout<<"removal done"<<endl;
 
+    // Fetch and display PhoneEntry instances by matching lastname or firstname or lastname, firstname, prints nothing
+    for (auto phoneEntry : dict.fetch(entry1.getFormattedName())) {
+        cout << "Phone entry for \'"<< entry1.getFormattedName() <<"\' is: " << phoneEntry.getDisplayString() << endl;
+    }
+
+    cout<<endl<<endl;
+    // Fetch and display PhoneEntry instances by matching lastname or firstname or lastname, firstname
+    for (auto phoneEntry : dict.fetch(entry2.getFormattedName())) {
+        cout << "Phone entry for \'"<< entry2.getFormattedName() <<"\' is: " << phoneEntry.getDisplayString() << endl;
+    }
     // Fetch the removed PhoneEntry (should be empty).
 //    for (auto value : dict.fetch(entry1.getFormattedName())) {
 //        cout << "Value for 'John Doe Smith' is: " << value.getDisplayString() << endl;
