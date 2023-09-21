@@ -183,7 +183,6 @@ private:
         for (char c : key) {
             sum += static_cast<int>(c);
         }
-//        cout<<key<<"  "<<sum<<"  "<<sum%N<<endl;
         return sum % N;
     }
 
@@ -209,39 +208,23 @@ public:
 
         keyTokens.clear();
         tokenize(key);
-//        for(auto key: keyTokens){
-//            cout<<key<<endl;
-//        }
+
         size_t index = hash(keyTokens[0]); //select hash based on lastname
-        cout<<index<<endl;
+
         auto& bucket = hashtable[index];
         bucket.insert(keyTokens[0], value);
-        bucket.print();
 
         if (keyTokens.size() > 2) {
             index = hash(keyTokens[2]); //select hash based on firstname
-            cout<<index<<endl;
             auto& bucket2 = hashtable[index];
             bucket2.insert(keyTokens[2], value);
-//            bucket.print();
 
             index = hash(keyTokens[0] +", "+ keyTokens[2]); //select hash based on "lastname, firstname"
-            cout<<index<<endl;
             auto& bucket3 = hashtable[index];
             bucket3.insert(keyTokens[0] +", "+ keyTokens[2], value);
-//            bucket.print();
         }
     }
 
-//    void getDisplayString() {
-//        for (size_t i = 0; i < N; ++i) {
-//            auto& bucket = hashtable[i];
-//            for (auto pair = bucket.begin(); pair != bucket.end(); ++pair) {
-////                std::cout << "Key: " << pair->data.first << ", Value: " << pair->data.second.getDisplayString() << std::endl;
-//                std::cout << "Key: " << std::endl;
-//            }
-//        }
-//    }
 
     void getDisplayString() {
         for (size_t i = 0; i < N; ++i) {
@@ -283,34 +266,27 @@ public:
         tokenize(key);
 
         size_t index = hash(keyTokens[0]); //select hash based on lastname
-        cout<<index<<endl;
         auto& bucket = hashtable[index];
 
         for (auto pair = bucket.begin(); pair != bucket.end(); pair = pair->next) {
-            cout<<pair->data.first<<endl;
             if (pair->data.first == keyTokens[0]) {
-//                cout<<"matched "<<pair->data.first << " " << keyTokens[0]<<endl;
                 values.push_back(pair->data.second);
             }
         }
 
         if (keyTokens.size() > 2) {
             index = hash(keyTokens[2]); //select hash based on lastname
-            cout<<index<<endl;
             auto& bucket2 = hashtable[index];
             for (auto pair = bucket2.begin(); pair != bucket2.end(); pair = pair->next) {
                 if (pair->data.first == keyTokens[2]) {
-//                    cout<<"matched "<<pair->data.first << " " << keyTokens[0]<<endl;
                     values.push_back(pair->data.second);
                 }
             }
 
             index = hash(keyTokens[0] +", "+ keyTokens[2]); //select hash based on "lastname, firstname"
-            cout<<index<<endl;
             auto& bucket3 = hashtable[index];
             for (auto pair = bucket3.begin(); pair != bucket3.end(); pair = pair->next) {
                 if (pair->data.first == keyTokens[0] +", "+ keyTokens[2]) {
-//                    cout<<"matched "<<pair->data.first << " " << keyTokens[0]<<endl;
                     values.push_back(pair->data.second);
                 }
             }
@@ -338,26 +314,44 @@ int main() {
     PhoneEntry entry2(name2, "456 Elm St", phoneNumber2);
     dict.insert(entry2.getFormattedName(), entry2);
 
+    cout<<endl<<endl<<endl;
+    cout<<"Output of fetch method. Showing all output that matched lastname or firstname or lastname+firstname";
+    cout<<endl<<endl;
     // Fetch and display PhoneEntry instances by matching lastname or firstname or lastname, firstname
     for (auto phoneEntry : dict.fetch(entry1.getFormattedName())) {
         cout << "Phone entry for \'"<< entry1.getFormattedName() <<"\' is: " << phoneEntry.getDisplayString() << endl;
     }
 
-    // Remove all phoneentries for a name
-//    dict.deleteAll(entry1.getFormattedName());
+    cout<<endl<<endl<<endl;
+    cout<<"Output for getDisplaystring";
+    cout<<endl<<endl;
+    // Display the contents of the dictionary.
+    dict.getDisplayString();
 
+    // Remove all phoneentries for a name
+    cout<<endl<<endl<<endl;
+    cout<<"Deletion performed for lastname M firstname";
+    dict.deleteAll(entry1.getFormattedName());
+
+    cout<<endl<<endl<<endl;
+    cout<<"Output of fetch method";
+    cout<<endl<<endl;
     // Fetch and display PhoneEntry instances by matching lastname or firstname or lastname, firstname, prints nothing
     for (auto phoneEntry : dict.fetch(entry1.getFormattedName())) {
         cout << "Phone entry for \'"<< entry1.getFormattedName() <<"\' is: " << phoneEntry.getDisplayString() << endl;
     }
 
+    cout<<endl<<endl<<endl;
+    cout<<"Output of fetch method";
     cout<<endl<<endl;
     // Fetch and display PhoneEntry instances by matching lastname or firstname or lastname, firstname
     for (auto phoneEntry : dict.fetch(entry2.getFormattedName())) {
         cout << "Phone entry for \'"<< entry2.getFormattedName() <<"\' is: " << phoneEntry.getDisplayString() << endl;
     }
 
-
+    cout<<endl<<endl<<endl;
+    cout<<"Output for getDisplaystring";
+    cout<<endl<<endl;
     // Display the contents of the dictionary.
     dict.getDisplayString();
 
