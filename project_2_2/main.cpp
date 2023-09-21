@@ -233,11 +233,24 @@ public:
         }
     }
 
-    void getDisplayString() {
+//    void getDisplayString() {
+//        for (size_t i = 0; i < N; ++i) {
+//            auto& bucket = hashtable[i];
+//            for (auto pair = bucket.begin(); pair != bucket.end(); ++pair) {
+////                std::cout << "Key: " << pair->data.first << ", Value: " << pair->data.second.getDisplayString() << std::endl;
+//                std::cout << "Key: " << std::endl;
+//            }
+//        }
+//    }
 
-        for (auto bucket : hashtable) {
-            for (auto pair = bucket.begin(); pair != bucket.end(); ++pair) {
-                std::cout << "Key: " << pair->data.first << ", Value: " << pair->data.second.getDisplayString() << std::endl;
+    void getDisplayString() {
+        for (size_t i = 0; i < N; ++i) {
+            auto& bucket = hashtable[i];
+            auto current = bucket.begin();
+
+            while (current != nullptr) {
+                std::cout << "Key: " << current->data.first << ", Value: " << current->data.second.getDisplayString() << std::endl;
+                current = current->next;
             }
         }
     }
@@ -331,8 +344,7 @@ int main() {
     }
 
     // Remove all phoneentries for a name
-    dict.deleteAll(entry1.getFormattedName());
-    cout<<"removal done"<<endl;
+//    dict.deleteAll(entry1.getFormattedName());
 
     // Fetch and display PhoneEntry instances by matching lastname or firstname or lastname, firstname, prints nothing
     for (auto phoneEntry : dict.fetch(entry1.getFormattedName())) {
@@ -344,13 +356,10 @@ int main() {
     for (auto phoneEntry : dict.fetch(entry2.getFormattedName())) {
         cout << "Phone entry for \'"<< entry2.getFormattedName() <<"\' is: " << phoneEntry.getDisplayString() << endl;
     }
-    // Fetch the removed PhoneEntry (should be empty).
-//    for (auto value : dict.fetch(entry1.getFormattedName())) {
-//        cout << "Value for 'John Doe Smith' is: " << value.getDisplayString() << endl;
-//    }
+
 
     // Display the contents of the dictionary.
-//    dict.getDisplayString();
+    dict.getDisplayString();
 
     return 0;
 }
