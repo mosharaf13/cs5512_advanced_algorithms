@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
-#include <queue>
 
 const int size = 9;
 
