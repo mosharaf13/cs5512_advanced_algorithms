@@ -59,9 +59,17 @@ int main() {
             }
         }
 
-        // Draw circles (vertices)
+        // Draw circles (vertices) and numbers
         for (int i = 0; i < arraySize; ++i) {
             window.draw(circles[i]);
+
+            // Display numbers on nodes
+            sf::Text numberText;
+            numberText.setString(std::to_string(i + 1));
+            numberText.setCharacterSize(20);
+            numberText.setFillColor(sf::Color::White);
+            numberText.setPosition(circles[i].getPosition() + sf::Vector2f(15, 15));
+            window.draw(numberText);
         }
 
         window.display();
