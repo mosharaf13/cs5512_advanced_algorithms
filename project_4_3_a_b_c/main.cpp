@@ -23,12 +23,14 @@ void generateRandomGraph(int graph[size][size]) {
 }
 
 // Function to perform Breadth-First Search and build the BFS tree
-void breadthFirstSearch(int graph[size][size], int startVertex, std::vector<std::vector<int> >& bfsTree) {
+// Additionally, it calculates the shortest distances from the startVertex to all other nodes
+void breadthFirstSearch(int graph[size][size], int startVertex, std::vector<std::vector<int> >& bfsTree, std::vector<int>& distances) {
     bool visited[size] = {false};
     std::queue<int> bfsQueue;
 
     visited[startVertex] = true;
     bfsQueue.push(startVertex);
+    distances[startVertex] = 0;
 
     while (!bfsQueue.empty()) {
         int currentVertex = bfsQueue.front();
@@ -39,6 +41,7 @@ void breadthFirstSearch(int graph[size][size], int startVertex, std::vector<std:
                 visited[i] = true;
                 bfsQueue.push(i);
                 bfsTree[currentVertex].push_back(i);
+                distances[i] = distances[currentVertex] + 1;
             }
         }
     }
@@ -50,12 +53,14 @@ int main() {
     generateRandomGraph(graph);
 
     int startVertex = 0;
+    int targetVertex = 8;
 
     std::vector<std::vector<int> > bfsTree(size);
+    std::vector<int> distances(size, -1);
 
-    std::cout << "Starting BFS from vertex " << startVertex << std::endl;
+    std::cout << "Starting BFS from vertex " << startVertex << " to find vertex " << targetVertex << std::endl;
 
-    breadthFirstSearch(graph, startVertex, bfsTree);
+    breadthFirstSearch(graph, startVertex, bfsTree, distances);
 
     // Display the BFS tree with node 0 as the root
     std::cout << "BFS tree with node 0 as the root:" << std::endl;
@@ -66,6 +71,9 @@ int main() {
         }
         std::cout << std::endl;
     }
+
+    // Display the shortest distance to the target vertex
+    std::cout << "Shortest distance from vertex " << startVertex << " to vertex " << targetVertex << ": " << distances[targetVertex] << std::endl;
 
     return 0;
 }
